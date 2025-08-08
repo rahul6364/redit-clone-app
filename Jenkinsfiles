@@ -3,7 +3,7 @@ pipeline {
 
     tools{
         jdk 'jdk17'
-        nodejs 'nodeJS17'
+        nodejs 'nodeJS 16'
     }
 
     environment{
@@ -49,9 +49,14 @@ pipeline {
                 }
             }
         }
+        stage('install dependencies'){
+            steps{
+                sh 'npm install'
+            }
+        }
         stage('trivy fs scan'){
             steps{
-                sh "trivy fs. >trivyfs.txt"
+                sh "trivy fs. > trivyfs.txt"
             }
         }  
     }
