@@ -1,0 +1,60 @@
+pipeline {
+    agent any
+
+    tools{
+        jdk 'jdk17'
+        nodejs 'nodeJS17'
+    }
+
+    environment{
+        SCANNER_HOME= tool 'sonarqube'
+        APP_NAME= "reddit-clone-app"
+        RELEASE= "1.0.0"
+        DOCKER_USER= 'rahul6364'
+        DOCKER_PASS= credentials('dockerhub')
+        IMAGE_NAME= "${DOCKER_USER}"+ "/" + "${APP_NAME}"
+        IMAGE_TAG= "${RELEASE}-${BUILD_NUMBER}"
+        SONAR_TOKEN=credentials('sonarQube-token')
+    }
+
+    stages{
+        stage('clean workspace'){
+            steps{
+                cleanWs()
+            }
+        }
+        stage('clonning the code'){
+            steps{
+                git branch: 'main', url: 'https://github.com/rahul6364/redit-clone-app.git'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh '''
+                        $SCANNER_HOME/bin/sonar-scanner \
+                        -Dsonar.projectKey=Reddit-clone-CI \
+                        -Dsonar.projectName=Reddit-clone-CI \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://172.18.194.230:9001 \
+                        -Dsonar.token=${SONAR_TOKEN}
+                    '''
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'MINUTES') {
+                waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        stage('trivy fs scan'){
+            steps{
+                sh "trivy fs. >trivyfs.txt"
+            }
+        }  
+    }
+}
+
+
