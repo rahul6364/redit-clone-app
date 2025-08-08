@@ -63,21 +63,35 @@ pipeline {
                sh "trivy fs . > trivyfs.txt"
             }
         }
-        stage('build and push Docker image'){
-            steps{
-                script{ 
-                    docker.withRegistry('',DOCKER_PASS)
-                    {
-                        docker_image=docker.build ${IMAGE_NAME}
-                    }
-                    docker.withRegistry('',DOCKER_PASS)
-                    {
-                        docker_image.push("${IMAGE_TAG}")
-                        docker_image.push('latest')
-                    }
+        // stage('build and push Docker image'){
+        //     steps{
+        //         script{ 
+        //             docker.withRegistry('',DOCKER_PASS)
+        //             {
+        //                 docker_image=docker.build ${IMAGE_NAME}
+        //             }
+        //             docker.withRegistry('',DOCKER_PASS)
+        //             {
+        //                 docker_image.push("${IMAGE_TAG}")
+        //                 docker_image.push('latest')
+        //             }
                     
-                }
+        //         }
                
+        //     }
+        // }
+
+        stage('docker build'){
+            steps{
+                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+            }
+        }
+        stage('docker push'){
+            steps{
+                withCredentials([userNamePassword(credentialsId:"dockerhub",passwordVarible:"dokcerPass",usernameVariable:"dockerUsername")]){
+                    sh "docker login -u ${env.dockerUsername} -p${env.dokcerPass}"
+                    sh " docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                }
             }
         }  
     }
