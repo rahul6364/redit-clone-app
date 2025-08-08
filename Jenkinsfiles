@@ -14,7 +14,7 @@ pipeline {
         DOCKER_PASS= credentials('dockerhub')
         IMAGE_NAME= "${DOCKER_USER}"+ "/" + "${APP_NAME}"
         IMAGE_TAG= "${RELEASE}-${BUILD_NUMBER}"
-        SONAR_TOKEN=credentials('sonarQube-token')
+        SONAR_TOKEN=credentials('sonar-token')
     }
 
     stages{
@@ -42,6 +42,16 @@ pipeline {
                 }
             }
         }
+        stage('Quality Gate') {
+            steps {
+                script {
+                    timeout(time: 2, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
+                    }
+                }
+            }
+        }
+
         
         stage('install dependencies'){
             steps{
