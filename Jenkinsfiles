@@ -11,7 +11,7 @@ pipeline {
         APP_NAME= "reddit-clone-app"
         RELEASE= "1.0.0"
         DOCKER_USER= 'rahul6364'
-        DOCKER_PASS= credentials('dockerhub')
+        
         IMAGE_NAME= "${DOCKER_USER}"+ "/" + "${APP_NAME}"
         IMAGE_TAG= "${RELEASE}-${BUILD_NUMBER}"
         SONAR_TOKEN=credentials('sonar-token')
@@ -56,11 +56,12 @@ pipeline {
         stage('install dependencies'){
             steps{
                 sh 'npm install'
+                sh 'npm audit fix || true'
             }
         }
         stage('trivy fs scan'){
             steps{
-               sh "trivy fs . > trivyfs.txt"
+               sh 'docker run --rm -v $PWD:/scan aquasec/trivy fs /scan'
             }
         }
         // stage('build and push Docker image'){
@@ -80,7 +81,13 @@ pipeline {
                
         //     }
         // }
-
+        stage('docker login'){
+            steps{
+                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh "docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}"
+                 }
+            }
+        }
         stage('docker build'){
             steps{
                 sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
@@ -88,10 +95,10 @@ pipeline {
         }
         stage('docker push'){
             steps{
-                withCredentials([usernamePassword(credentialsId:"dockerhub",passwordVariable:"dockerPass",usernameVariable:"dockerUsername")]){
-                    sh "echo ${dockerPass} | docker login -u ${dockerUsername} --password-stdin"
-                    sh " docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh "docker login -u $DOCKER_USER -p $DOCKER_PASS"
                 }
+                sh " docker push ${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }  
     }
