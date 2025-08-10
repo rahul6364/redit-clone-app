@@ -24,6 +24,9 @@ pipeline {
             }
         }
         stage('clonning the code'){
+            when {
+                expression { !fileExists('package.json') } // only clone if repo not already checked out
+            }
             steps{
                 git branch: 'main', url: 'https://github.com/rahul6364/redit-clone-app.git'
             }
