@@ -18,11 +18,11 @@ pipeline {
     }
 
     stages{
-        stage('clean workspace'){
-            steps{
-                cleanWs()
-            }
-        }
+        // stage('clean workspace'){
+        //     steps{
+        //         cleanWs()
+        //     }
+        // }
         stage('clonning the code'){
             when {
                 expression { !fileExists('package.json') } // only clone if repo not already checked out
