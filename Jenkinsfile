@@ -18,11 +18,11 @@ pipeline {
     }
 
     stages{
-        // stage('clean workspace'){
-        //     steps{
-        //         cleanWs()
-        //     }
-        // }
+        stage('clean workspace'){
+            steps{
+                cleanWs()
+            }
+        }
         stage('clonning the code'){
             when {
                 expression { !fileExists('package.json') } // only clone if repo not already checked out
@@ -102,6 +102,11 @@ pipeline {
                     sh "docker login -u $DOCKER_USER -p $DOCKER_PASS"
                 }
                 sh " docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+            }
+        }
+        stage('trivy image scan'){
+            steps{
+                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --exit-code 1 --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG}'
             }
         }  
     }
