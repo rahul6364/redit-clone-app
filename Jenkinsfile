@@ -106,7 +106,9 @@ pipeline {
         }
         stage('trivy image scan'){
             steps{
-                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --exit-code 1 --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG}'
+                sh '''
+                trivy image --exit-code 1 --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG}
+                ''' 
             }
         }  
     }
