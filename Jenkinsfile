@@ -110,6 +110,11 @@ pipeline {
                 trivy image --exit-code 0 --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG}
                 '''
             }
+        }
+        stage('clean the artifacts'){
+            steps{
+                sh 'docker rmi ${IMAGE_NAME}:${IMAGE_TAG}'
+            }
         }  
     }
 }
