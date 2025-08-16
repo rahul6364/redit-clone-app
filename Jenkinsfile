@@ -15,6 +15,7 @@ pipeline {
         IMAGE_NAME= "${DOCKER_USER}"+ "/" + "${APP_NAME}"
         IMAGE_TAG= "${RELEASE}-${BUILD_NUMBER}"
         SONAR_TOKEN=credentials('sonar-token')
+        JENKINS_API_TOKEN=credentials('JENKINS_API_TOKEN')
     }
 
     stages{
@@ -115,7 +116,22 @@ pipeline {
             steps{
                 sh 'docker rmi ${IMAGE_NAME}:${IMAGE_TAG}'
             }
-        }  
+        }
+        stage("Trigger CD Pipeline") {
+            steps {
+                script {
+                    sh """
+                        curl -v -k --user rahul:${JENKINS_API_TOKEN} \
+                        -X POST \
+                        -H 'cache-control: no-cache' \
+                        -H 'content-type: application/x-www-form-urlencoded' \
+                        --data 'IMAGE_TAG=${IMAGE_TAG}' \
+                        http://http://localhost:8081/job/Reddit-Clone-CD/buildWithParameters?token=gitOps-token
+                    """
+                }
+            }
+        }
+  
     }
 }
 
