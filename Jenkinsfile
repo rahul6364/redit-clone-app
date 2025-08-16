@@ -126,7 +126,7 @@ pipeline {
                         -H 'cache-control: no-cache' \
                         -H 'content-type: application/x-www-form-urlencoded' \
                         --data 'IMAGE_TAG=${IMAGE_TAG}' \
-                        http://http://localhost:8081/job/Reddit-Clone-CD/buildWithParameters?token=gitOps-token
+                        http://localhost:8081/job/Reddit-Clone-CD/buildWithParameters?token=gitOps-token
                     """
                 }
             }
