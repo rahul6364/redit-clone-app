@@ -126,7 +126,7 @@ pipeline {
                         -H 'cache-control: no-cache' \
                         -H 'content-type: application/x-www-form-urlencoded' \
                         --data 'IMAGE_TAG=${IMAGE_TAG}' \
-                        https://00941453af3f.ngrok-free.app/job/Reddit-Clone-CD/buildWithParameters?token=gitOps-token
+                        https://a065df261681.ngrok-free.app/job/Reddit-Clone-CD/buildWithParameters?token=gitOps-token
                     """
                 }
             }
